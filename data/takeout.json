@@ -1,0 +1,102 @@
+[
+  {
+    "name": "兰州牛肉面",
+    "category": "中式主食",
+    "image": "images/food/兰州牛肉面.webp"
+  },
+  {
+    "name": "扬州炒饭",
+    "category": "中式主食",
+    "image": "images/food/扬州炒饭.webp"
+  },
+  {
+    "name": "鲜虾云吞面",
+    "category": "中式主食",
+    "image": "images/food/鲜虾云吞面.webp"
+  },
+  {
+    "name": "鸡汤米线",
+    "category": "中式主食",
+    "image": "images/food/鸡汤米线.webp"
+  },
+  {
+    "name": "黄焖鸡米饭",
+    "category": "家常菜",
+    "image": "images/food/黄焖鸡米饭.webp"
+  },
+  {
+    "name": "番茄牛腩饭",
+    "category": "家常菜",
+    "image": "images/food/番茄牛腩饭.webp"
+  },
+  {
+    "name": "鱼香肉丝盖饭",
+    "category": "家常菜",
+    "image": "images/food/鱼香肉丝盖饭.webp"
+  },
+  {
+    "name": "重庆小面",
+    "category": "川湘菜",
+    "image": "images/food/重庆小面.webp"
+  },
+  {
+    "name": "麻辣香锅",
+    "category": "川湘菜",
+    "image": "images/food/麻辣香锅.webp"
+  },
+  {
+    "name": "水煮鱼",
+    "category": "川湘菜",
+    "image": "images/food/水煮鱼.webp"
+  },
+  {
+    "name": "潮汕牛肉火锅",
+    "category": "火锅烧烤",
+    "image": "images/food/潮汕牛肉火锅.webp"
+  },
+  {
+    "name": "炭火烤串",
+    "category": "火锅烧烤",
+    "image": "images/food/炭火烤串.webp"
+  },
+  {
+    "name": "经典牛肉汉堡",
+    "category": "快餐",
+    "image": "images/food/经典牛肉汉堡.webp"
+  },
+  {
+    "name": "脆皮鸡排饭",
+    "category": "快餐",
+    "image": "images/food/脆皮鸡排饭.webp"
+  },
+  {
+    "name": "披萨套餐",
+    "category": "快餐",
+    "image": "images/food/披萨套餐.webp"
+  },
+  {
+    "name": "照烧鸡腿饭",
+    "category": "日韩料理",
+    "image": "images/food/照烧鸡腿饭.webp"
+  },
+  {
+    "name": "日式豚骨拉面",
+    "category": "日韩料理",
+    "image": "images/food/日式豚骨拉面.webp"
+  },
+  {
+    "name": "韩式石锅拌饭",
+    "category": "日韩料理",
+    "image": "images/food/韩式石锅拌饭.webp"
+  },
+  {
+    "name": "煎饼果子",
+    "category": "小吃甜品",
+    "image": "images/food/煎饼果子.webp"
+  },
+  {
+    "name": "杨枝甘露",
+    "category": "小吃甜品",
+    "image": "images/food/杨枝甘露.webp"
+  }
+]

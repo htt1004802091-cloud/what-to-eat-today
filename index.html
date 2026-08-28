@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="今天吃什么——帮你快速决定点外卖，还是自己做。"
+    />
+    <title>今天吃什么</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="ambient-shape ambient-shape--orange" aria-hidden="true"></div>
+    <div class="ambient-shape ambient-shape--yellow" aria-hidden="true"></div>
+
+    <main class="app-shell">
+      <section class="home-view" data-view="home" aria-labelledby="page-title">
+        <span class="notebook-holes" aria-hidden="true"></span>
+        <span class="home-doodle home-doodle--left" aria-hidden="true"></span>
+
+        <header class="hero">
+          <span class="hero__tape" aria-hidden="true"></span>
+          <span class="hero__star" aria-hidden="true">★</span>
+          <div class="hero__title-row">
+            <h1 id="page-title" tabindex="-1">今天吃什么？</h1>
+            <span class="hero__rays" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+          <span class="hero__underline" aria-hidden="true"></span>
+          <p class="hero__description"><span>别纠结啦，交给我吧～</span></p>
+        </header>
+
+        <div class="entry-stack" aria-label="选择用餐方式">
+          <button class="entry-card entry-card--takeout" type="button" data-mode="takeout">
+            <span class="entry-card__paper-label">懒人必备 <b aria-hidden="true">♥</b></span>
+            <span class="entry-card__content">
+              <span class="entry-card__label">点外卖</span>
+              <span class="entry-card__scribble" aria-hidden="true"></span>
+              <span class="entry-card__hint">今天不想动～</span>
+              <span class="entry-card__cta" aria-hidden="true">→</span>
+            </span>
+            <span class="entry-card__visual" aria-hidden="true">
+              <img
+                class="entry-card__food entry-card__food--drink"
+                src="images/food/柠檬蜂蜜茶.webp"
+                width="768"
+                height="768"
+                alt=""
+                decoding="async"
+              />
+              <img
+                class="entry-card__food entry-card__food--burger"
+                src="images/food/经典牛肉汉堡.webp"
+                width="768"
+                height="768"
+                alt=""
+                decoding="async"
+              />
+              <span class="sticker-burst sticker-burst--orange"><i></i><i></i><i></i></span>
+              <span class="paper-star paper-star--yellow">★</span>
+            </span>
+          </button>
+
+          <button class="entry-card entry-card--recipe" type="button" data-mode="recipe">
+            <span class="entry-card__tape" aria-hidden="true"></span>
+            <span class="entry-card__visual" aria-hidden="true">
+              <img
+                class="entry-card__food entry-card__food--recipe"
+                src="images/food/鲜虾云吞面.webp"
+                width="768"
+                height="768"
+                alt=""
+                decoding="async"
+              />
+            </span>
+            <span class="entry-card__content">
+              <span class="entry-card__label">自己做</span>
+              <span class="entry-card__chef-hat" aria-hidden="true"><i></i></span>
+              <span class="entry-card__scribble" aria-hidden="true"></span>
+              <span class="entry-card__hint">今天下个厨！</span>
+              <span class="entry-card__cta" aria-hidden="true">→</span>
+            </span>
+            <span class="entry-card__arrow-doodle" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <p class="footer-note">
+          <span aria-hidden="true">☆</span>
+          让每一餐都值得期待
+          <span aria-hidden="true">♥</span>
+        </p>
+      </section>
+
+      <section
+        class="recommendation-view recommendation-view--takeout"
+        data-view="takeout"
+        aria-labelledby="takeout-view-title"
+        hidden
+      >
+        <header class="takeout-header">
+          <button class="takeout-back" type="button" data-action="back">
+            <span class="takeout-back__arrow" aria-hidden="true">←</span>
+            <span>返回</span>
+          </button>
+        </header>
+
+        <div class="takeout-title">
+          <span class="takeout-title__star" aria-hidden="true">★</span>
+          <h2 id="takeout-view-title" tabindex="-1">今天就吃这个！</h2>
+          <span class="takeout-title__rays" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="takeout-title__underline" aria-hidden="true"></span>
+        </div>
+
+        <article class="takeout-result" data-result="takeout" aria-live="polite">
+          <span class="takeout-result__tape" aria-hidden="true"></span>
+          <span class="takeout-result__spark takeout-result__spark--left" aria-hidden="true">×</span>
+
+          <div class="takeout-food-stage">
+            <span class="takeout-food-stage__shadow" aria-hidden="true"></span>
+            <img
+              class="takeout-food"
+              id="takeout-image"
+              src="images/food/重庆小面.webp"
+              alt="重庆小面"
+              decoding="async"
+            />
+            <span class="takeout-food-stage__accent" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+
+          <div class="takeout-copy">
+            <div class="takeout-copy__heading">
+              <h3 id="takeout-name">请稍候…</h3>
+              <span class="takeout-category" id="takeout-category">正在读取</span>
+            </div>
+            <span class="takeout-copy__scribble" aria-hidden="true"></span>
+            <p>今天就它啦～</p>
+          </div>
+        </article>
+
+        <div class="takeout-actions">
+          <button class="takeout-change" type="button" data-action="change-takeout">
+            <span class="takeout-change__die" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+            <span>换一个</span>
+          </button>
+
+          <button class="takeout-home-link" type="button" data-action="back">
+            <span aria-hidden="true">←</span>
+            不喜欢 · 回首页
+            <i aria-hidden="true"></i>
+          </button>
+        </div>
+        <p class="status-message" id="takeout-status" role="alert" hidden></p>
+      </section>
+
+      <section
+        class="recommendation-view recommendation-view--recipe"
+        data-view="recipe"
+        aria-labelledby="recipe-view-title"
+        hidden
+      >
+        <header class="recipe-pick-header">
+          <button class="recipe-pick-back" type="button" data-action="back">
+            <span aria-hidden="true">←</span>
+            <span>返回</span>
+          </button>
+        </header>
+
+        <div class="recipe-pick-title">
+          <span class="recipe-pick-title__star" aria-hidden="true">★</span>
+          <h2 id="recipe-view-title" tabindex="-1">今天就做这个！</h2>
+          <span class="recipe-pick-title__leaf" aria-hidden="true"></span>
+          <span class="recipe-pick-title__underline" aria-hidden="true"></span>
+        </div>
+
+        <article class="recipe-pick-result" data-result="recipe" aria-live="polite">
+          <span class="recipe-pick-result__tape" aria-hidden="true"></span>
+          <span class="recipe-pick-result__spark" aria-hidden="true">×</span>
+
+          <div class="recipe-food-stage">
+            <span class="recipe-food-stage__shadow" aria-hidden="true"></span>
+            <img
+              class="recipe-food"
+              id="recipe-image"
+              src="images/food/番茄炒蛋.webp"
+              alt="番茄炒蛋"
+              decoding="async"
+            />
+            <span class="recipe-food-stage__accent" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+
+          <div class="recipe-pick-copy">
+            <h3 id="recipe-name">请稍候…</h3>
+            <div class="recipe-tag-notes" aria-label="菜谱信息">
+              <span class="recipe-tag-note recipe-tag-note--category" id="recipe-category">正在读取</span>
+              <span class="recipe-tag-note recipe-tag-note--difficulty" id="recipe-difficulty">难度</span>
+            </div>
+            <span class="recipe-pick-copy__scribble" aria-hidden="true"></span>
+            <p>今天做个下饭的～</p>
+          </div>
+        </article>
+
+        <div class="recipe-pick-actions">
+          <button class="recipe-change" type="button" data-action="change-recipe">
+            <span class="recipe-change__mark" aria-hidden="true">✦</span>
+            <span>换一个</span>
+          </button>
+          <button class="recipe-detail-link" type="button" data-action="open-recipe-detail">
+            看看怎么做
+            <span aria-hidden="true">→</span>
+            <i aria-hidden="true"></i>
+          </button>
+        </div>
+        <p class="status-message" id="recipe-status" role="alert" hidden></p>
+      </section>
+
+      <section
+        class="recommendation-view recipe-detail-view"
+        data-view="recipe-detail"
+        aria-labelledby="recipe-detail-view-title"
+        hidden
+      >
+        <header class="recipe-detail-header">
+          <button
+            class="recipe-detail-back"
+            type="button"
+            data-action="back-to-recipe"
+          >
+            <span class="recipe-detail-back__arrow" aria-hidden="true">←</span>
+            <span>返回</span>
+          </button>
+        </header>
+
+        <div class="recipe-details" id="recipe-details">
+          <div class="recipe-detail-collage">
+            <article class="recipe-detail-hero">
+              <header class="recipe-detail-heading">
+                <span class="recipe-detail-heading__spark" aria-hidden="true">✦</span>
+                <h2 id="recipe-detail-view-title" tabindex="-1">请稍候…</h2>
+                <span class="recipe-detail-heading__underline" aria-hidden="true"></span>
+                <div class="recipe-detail-tags" aria-label="菜谱信息">
+                  <span
+                    class="recipe-detail-tag recipe-detail-tag--category"
+                    id="recipe-detail-category"
+                  >分类</span>
+                  <span
+                    class="recipe-detail-tag recipe-detail-tag--difficulty"
+                    id="recipe-detail-difficulty"
+                  >难度</span>
+                </div>
+              </header>
+
+              <div class="recipe-detail-food-paper">
+                <span class="recipe-detail-food-tape" aria-hidden="true"></span>
+                <span class="recipe-detail-food-spark" aria-hidden="true">✦</span>
+                <span class="recipe-detail-food-heart" aria-hidden="true">♡</span>
+                <span class="recipe-detail-food-arrow" aria-hidden="true">↝</span>
+                <span class="recipe-detail-chef-hat" aria-hidden="true"><i></i></span>
+                <div class="recipe-detail-food-stage">
+                  <img
+                    class="recipe-detail-image"
+                    id="recipe-detail-image"
+                    src="images/food/番茄炒蛋.webp"
+                    alt="番茄炒蛋"
+                    decoding="async"
+                  />
+                </div>
+              </div>
+            </article>
+
+            <section class="ingredients-panel" aria-labelledby="ingredients-title">
+              <div class="ingredients-sheet">
+                <span class="ingredients-sheet__tape" aria-hidden="true"></span>
+                <header class="ingredients-sheet__heading">
+                  <h3 id="ingredients-title">需要这些</h3>
+                  <span aria-hidden="true">✦</span>
+                </header>
+                <ul id="recipe-ingredients"></ul>
+                <span class="ingredients-sheet__tomato" aria-hidden="true">🍅</span>
+              </div>
+            </section>
+          </div>
+
+          <section class="steps-section" aria-labelledby="steps-title">
+            <div class="recipe-steps-paper">
+              <span class="recipe-steps-paper__tape" aria-hidden="true"></span>
+              <header class="detail-section-heading detail-section-heading--steps">
+                <h3 id="steps-title">开始做啦！</h3>
+                <span class="detail-section-heading__pan" aria-hidden="true">🍳</span>
+              </header>
+              <span class="recipe-steps-decoration recipe-steps-decoration--bowl" aria-hidden="true">🥣</span>
+              <span class="recipe-steps-decoration recipe-steps-decoration--tomato" aria-hidden="true">🍅</span>
+              <span class="recipe-steps-decoration recipe-steps-decoration--pan" aria-hidden="true">🍳</span>
+              <ol id="recipe-steps"></ol>
+            </div>
+            <footer class="recipe-steps-finish" aria-hidden="true">
+              <span></span>
+              <strong>开饭啦～</strong>
+              <b>♡</b>
+            </footer>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/app.js" defer></script>
+  </body>
+</html>
