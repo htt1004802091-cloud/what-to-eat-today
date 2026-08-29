@@ -2152,6 +2152,80 @@ h1:focus,
   text-align: center;
 }
 
+.takeout-change:disabled,
+.recipe-change:disabled,
+.recipe-detail-link:disabled {
+  cursor: wait;
+  filter: saturate(0.86);
+  opacity: 0.82;
+}
+
+.takeout-change:disabled:hover,
+.takeout-change:disabled:active {
+  box-shadow:
+    0 6px 0 #d99918,
+    0 11px 0 rgba(255, 253, 246, 0.9),
+    0 18px 25px rgba(91, 60, 25, 0.2);
+  transform: rotate(-0.7deg);
+}
+
+.recipe-change:disabled:hover,
+.recipe-change:disabled:active {
+  box-shadow:
+    0 6px 0 #718d2e,
+    0 11px 0 rgba(255, 253, 246, 0.9),
+    0 18px 25px rgba(63, 79, 35, 0.2);
+  transform: rotate(0.6deg);
+}
+
+.takeout-change.is-loading .takeout-change__die,
+.recipe-change.is-loading .recipe-change__mark {
+  animation: recommendation-image-loading 850ms ease-in-out infinite alternate;
+}
+
+.takeout-food-stage.is-image-error::after,
+.recipe-food-stage.is-image-error::after,
+.recipe-detail-food-stage.is-image-error::after {
+  position: absolute;
+  z-index: 8;
+  display: grid;
+  width: min(72%, 238px);
+  min-height: 96px;
+  place-items: center;
+  padding: 18px 22px;
+  border: 2px dashed rgba(102, 122, 62, 0.36);
+  color: #6f604a;
+  background:
+    linear-gradient(105deg, rgba(255, 255, 255, 0.32), transparent 58%),
+    #fff4cf;
+  box-shadow: 4px 7px 13px rgba(77, 61, 38, 0.12);
+  clip-path: polygon(2% 5%, 20% 1%, 38% 5%, 57% 1%, 77% 5%, 98% 2%, 96% 25%, 100% 50%, 97% 76%, 99% 97%, 78% 94%, 59% 100%, 39% 95%, 19% 99%, 1% 95%, 4% 72%, 0 47%, 4% 23%);
+  content: attr(data-image-error);
+  font-family: "STKaiti", "KaiTi", "PingFang SC", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  transform: rotate(-1.5deg);
+}
+
+.takeout-food-stage.is-image-error .takeout-food-stage__shadow,
+.recipe-food-stage.is-image-error .recipe-food-stage__shadow {
+  opacity: 0;
+}
+
+@keyframes recommendation-image-loading {
+  from {
+    opacity: 0.58;
+    transform: translateY(-1px) rotate(-10deg) scale(0.94);
+  }
+
+  to {
+    opacity: 0.94;
+    transform: translateY(1px) rotate(8deg) scale(1.04);
+  }
+}
+
 .recipe-details {
   margin-top: 58px;
   scroll-margin-top: 76px;
@@ -4386,6 +4460,40 @@ h1:focus,
   }
 }
 
+@media (max-width: 719px) {
+  /* 真机长标题：在标签与大食物之间保留明确的纵向安全区。 */
+  #recipe-details .recipe-detail-collage.has-multiline-title {
+    min-height: 736px;
+  }
+
+  #recipe-details .recipe-detail-collage.has-multiline-title:not(:has(#recipe-ingredients li:nth-child(4))) {
+    min-height: 716px;
+  }
+
+  .recipe-detail-view .recipe-detail-collage.has-multiline-title .recipe-detail-food-paper {
+    top: 187px;
+  }
+
+  .recipe-detail-view .recipe-detail-collage.has-multiline-title .ingredients-panel {
+    top: 487px;
+  }
+}
+
+@media (max-width: 370px) {
+  #recipe-details .recipe-detail-collage.has-multiline-title,
+  #recipe-details .recipe-detail-collage.has-multiline-title:not(:has(#recipe-ingredients li:nth-child(4))) {
+    min-height: 743px;
+  }
+
+  .recipe-detail-view .recipe-detail-collage.has-multiline-title .recipe-detail-food-paper {
+    top: 191px;
+  }
+
+  .recipe-detail-view .recipe-detail-collage.has-multiline-title .ingredients-panel {
+    top: 491px;
+  }
+}
+
 @media (min-width: 720px) {
   .recipe-detail-view {
     width: min(100%, 820px);
@@ -4598,6 +4706,11 @@ h1:focus,
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .takeout-change.is-loading .takeout-change__die,
+  .recipe-change.is-loading .recipe-change__mark {
+    animation: none;
+  }
+
   .recipe-detail-view .recipe-detail-back {
     transition: none;
   }
