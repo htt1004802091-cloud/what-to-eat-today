@@ -8,6 +8,9 @@ const changeRecipeButton = document.querySelector('[data-action="change-recipe"]
 const openRecipeDetailButton = document.querySelector('[data-action="open-recipe-detail"]');
 const backToRecipeButton = document.querySelector('[data-action="back-to-recipe"]');
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const CANDIDATE_POOL_SIZE = 2;
+const CANDIDATE_PRELOAD_ATTEMPT_LIMIT = 3;
+const SLOW_IMAGE_THRESHOLD = 3000;
 
 let takeoutItems = [];
 let recipeItems = [];
@@ -19,6 +22,26 @@ let recipeRequestToken = 0;
 let takeoutLoading = false;
 let recipeLoading = false;
 let recipeTitleLayoutFrame = 0;
+let activeMode = null;
+let dataReady = false;
+let dataLoadPromise = null;
+let backgroundPreloadRunning = false;
+let backgroundCandidate = null;
+let candidateFillTimer = 0;
+
+const imageLoadStates = new Map();
+const candidatePools = {
+  takeout: [],
+  recipe: [],
+};
+const candidatePoolGenerations = {
+  takeout: 0,
+  recipe: 0,
+};
+const candidatePreloadPaused = {
+  takeout: false,
+  recipe: false,
+};
 
 function showView(viewName) {
   views.forEach((view) => {
@@ -221,7 +244,7 @@ function addRetryQuery(path) {
   return `${path}${separator}image-retry=${Date.now()}`;
 }
 
-function loadImageOnce(path) {
+function loadImageOnce(path, { priority = "auto" } = {}) {
   return new Promise((resolve, reject) => {
     const image = new Image();
     const timeout = window.setTimeout(() => {
@@ -231,6 +254,9 @@ function loadImageOnce(path) {
     }, 10000);
 
     image.decoding = "async";
+    if ("fetchPriority" in image) {
+      image.fetchPriority = priority;
+    }
     image.onload = async () => {
       window.clearTimeout(timeout);
 
@@ -257,18 +283,243 @@ function loadImageOnce(path) {
   });
 }
 
-async function loadImageWithRetry(path) {
+async function loadImageWithRetry(path, { priority = "auto" } = {}) {
   try {
-    return { imageUrl: await loadImageOnce(path), error: null };
+    return {
+      imageUrl: await loadImageOnce(path, { priority }),
+      error: null,
+    };
   } catch (firstError) {
     await wait(180);
 
     try {
-      return { imageUrl: await loadImageOnce(addRetryQuery(path)), error: null };
+      return {
+        imageUrl: await loadImageOnce(addRetryQuery(path), { priority }),
+        error: null,
+      };
     } catch (secondError) {
       return { imageUrl: null, error: secondError ?? firstError };
     }
   }
+}
+
+function loadImage(path, { priority = "auto" } = {}) {
+  const existing = imageLoadStates.get(path);
+
+  if (existing?.status === "ready") {
+    return Promise.resolve({
+      imageUrl: existing.imageUrl,
+      error: null,
+      reused: true,
+    });
+  }
+
+  if (existing?.status === "loading") {
+    return existing.promise.then((result) => ({ ...result, reused: true }));
+  }
+
+  const promise = loadImageWithRetry(path, { priority }).then((result) => {
+    if (result.imageUrl) {
+      imageLoadStates.set(path, {
+        status: "ready",
+        imageUrl: result.imageUrl,
+      });
+    } else {
+      imageLoadStates.delete(path);
+    }
+
+    return { ...result, reused: false };
+  });
+
+  imageLoadStates.set(path, { status: "loading", promise });
+  return promise;
+}
+
+function getModeItems(mode) {
+  return mode === "takeout" ? takeoutItems : recipeItems;
+}
+
+function getModeCurrentName(mode) {
+  return mode === "takeout" ? currentTakeoutName : currentRecipeName;
+}
+
+function getModeLoading(mode) {
+  return mode === "takeout" ? takeoutLoading : recipeLoading;
+}
+
+function setActiveMode(mode) {
+  if (activeMode === mode) {
+    return;
+  }
+
+  window.clearTimeout(candidateFillTimer);
+  candidateFillTimer = 0;
+
+  if (activeMode) {
+    candidatePoolGenerations[activeMode] += 1;
+  }
+
+  activeMode = mode;
+
+  if (mode) {
+    scheduleCandidateFill(mode);
+  }
+}
+
+function shouldPauseCandidatePreload(mode) {
+  const connection = navigator.connection
+    ?? navigator.mozConnection
+    ?? navigator.webkitConnection;
+  const slowConnection = connection
+    && (connection.saveData || ["slow-2g", "2g"].includes(connection.effectiveType));
+
+  return activeMode !== mode
+    || document.hidden
+    || getModeLoading(mode)
+    || candidatePreloadPaused[mode]
+    || Boolean(slowConnection);
+}
+
+function takeReadyCandidate(mode) {
+  const pool = candidatePools[mode];
+  const currentName = getModeCurrentName(mode);
+
+  while (pool.length > 0) {
+    const candidate = pool.shift();
+
+    if (candidate.item.name !== currentName) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+function getForegroundRandomItem(mode) {
+  const items = getModeItems(mode);
+  const currentName = getModeCurrentName(mode);
+  const excludedNames = new Set([
+    currentName,
+    ...candidatePools[mode].map((candidate) => candidate.item.name),
+  ]);
+
+  if (backgroundCandidate?.mode === mode) {
+    excludedNames.add(backgroundCandidate.item.name);
+  }
+
+  const availableItems = items.filter((item) => !excludedNames.has(item.name));
+  return getRandomItem(availableItems.length > 0 ? availableItems : items, currentName);
+}
+
+function getCandidateItem(mode, attemptedNames) {
+  const currentName = getModeCurrentName(mode);
+  const excludedNames = new Set([
+    currentName,
+    ...attemptedNames,
+    ...candidatePools[mode].map((candidate) => candidate.item.name),
+  ]);
+  const availableItems = getModeItems(mode)
+    .filter((item) => !excludedNames.has(item.name));
+
+  return getRandomItem(availableItems, null);
+}
+
+function scheduleCandidateFill(mode) {
+  window.clearTimeout(candidateFillTimer);
+  candidateFillTimer = window.setTimeout(() => {
+    candidateFillTimer = 0;
+    void fillCandidatePool(mode);
+  }, 0);
+}
+
+async function fillCandidatePool(mode) {
+  if (
+    backgroundPreloadRunning
+    || shouldPauseCandidatePreload(mode)
+    || !getModeCurrentName(mode)
+    || candidatePools[mode].length >= CANDIDATE_POOL_SIZE
+  ) {
+    return false;
+  }
+
+  const generation = candidatePoolGenerations[mode];
+  const attemptedNames = new Set();
+  let attempts = 0;
+  let added = 0;
+
+  backgroundPreloadRunning = true;
+
+  try {
+    while (
+      attempts < CANDIDATE_PRELOAD_ATTEMPT_LIMIT
+      && candidatePools[mode].length < CANDIDATE_POOL_SIZE
+      && !shouldPauseCandidatePreload(mode)
+      && generation === candidatePoolGenerations[mode]
+    ) {
+      const item = getCandidateItem(mode, attemptedNames);
+
+      if (!item) {
+        break;
+      }
+
+      attempts += 1;
+      attemptedNames.add(item.name);
+      backgroundCandidate = { mode, item };
+
+      const startedAt = window.performance.now();
+      const { imageUrl } = await loadImage(item.image, { priority: "low" });
+      const elapsed = window.performance.now() - startedAt;
+      backgroundCandidate = null;
+
+      if (
+        activeMode !== mode
+        || document.hidden
+        || generation !== candidatePoolGenerations[mode]
+      ) {
+        break;
+      }
+
+      if (!imageUrl) {
+        if (elapsed >= SLOW_IMAGE_THRESHOLD) {
+          candidatePreloadPaused[mode] = true;
+          break;
+        }
+
+        continue;
+      }
+
+      const isCurrent = item.name === getModeCurrentName(mode);
+      const isDuplicate = candidatePools[mode]
+        .some((candidate) => candidate.item.name === item.name);
+
+      if (!isCurrent && !isDuplicate) {
+        candidatePools[mode].push({ item, imageUrl });
+        added += 1;
+      }
+
+      if (elapsed >= SLOW_IMAGE_THRESHOLD) {
+        candidatePreloadPaused[mode] = true;
+        break;
+      }
+    }
+  } finally {
+    backgroundCandidate = null;
+    backgroundPreloadRunning = false;
+
+    if (activeMode && activeMode !== mode) {
+      scheduleCandidateFill(activeMode);
+    } else if (
+      activeMode === mode
+      && attempts > 0
+      && attempts < CANDIDATE_PRELOAD_ATTEMPT_LIMIT
+      && candidatePools[mode].length < CANDIDATE_POOL_SIZE
+      && !shouldPauseCandidatePreload(mode)
+    ) {
+      scheduleCandidateFill(mode);
+    }
+  }
+
+  return added > 0;
 }
 
 async function requestTakeout({ animate = true } = {}) {
@@ -276,7 +527,8 @@ async function requestTakeout({ animate = true } = {}) {
     return false;
   }
 
-  const item = getRandomItem(takeoutItems, currentTakeoutName);
+  const candidate = takeReadyCandidate("takeout");
+  const item = candidate?.item ?? getForegroundRandomItem("takeout");
 
   if (!item) {
     showError("takeout", "暂时没有可推荐的外卖，请检查数据文件。");
@@ -289,7 +541,15 @@ async function requestTakeout({ animate = true } = {}) {
   hideError("takeout");
 
   try {
-    const { imageUrl } = await loadImageWithRetry(item.image);
+    let imageUrl = candidate?.imageUrl ?? null;
+
+    if (!candidate) {
+      const startedAt = window.performance.now();
+      const result = await loadImage(item.image, { priority: "high" });
+      const elapsed = window.performance.now() - startedAt;
+      imageUrl = result.imageUrl;
+      candidatePreloadPaused.takeout = !imageUrl || elapsed >= SLOW_IMAGE_THRESHOLD;
+    }
 
     if (requestToken !== takeoutRequestToken) {
       return false;
@@ -301,6 +561,10 @@ async function requestTakeout({ animate = true } = {}) {
       await animateResult("takeout", commit);
     } else {
       commit();
+    }
+
+    if (imageUrl && activeMode === "takeout") {
+      scheduleCandidateFill("takeout");
     }
 
     return Boolean(imageUrl);
@@ -317,7 +581,8 @@ async function requestRecipe({ animate = true } = {}) {
     return false;
   }
 
-  const item = getRandomItem(recipeItems, currentRecipeName);
+  const candidate = takeReadyCandidate("recipe");
+  const item = candidate?.item ?? getForegroundRandomItem("recipe");
 
   if (!item) {
     showError("recipe", "暂时没有可推荐的菜谱，请检查数据文件。");
@@ -330,7 +595,15 @@ async function requestRecipe({ animate = true } = {}) {
   hideError("recipe");
 
   try {
-    const { imageUrl } = await loadImageWithRetry(item.image);
+    let imageUrl = candidate?.imageUrl ?? null;
+
+    if (!candidate) {
+      const startedAt = window.performance.now();
+      const result = await loadImage(item.image, { priority: "high" });
+      const elapsed = window.performance.now() - startedAt;
+      imageUrl = result.imageUrl;
+      candidatePreloadPaused.recipe = !imageUrl || elapsed >= SLOW_IMAGE_THRESHOLD;
+    }
 
     if (requestToken !== recipeRequestToken) {
       return false;
@@ -342,6 +615,10 @@ async function requestRecipe({ animate = true } = {}) {
       await animateResult("recipe", commit);
     } else {
       commit();
+    }
+
+    if (imageUrl && activeMode === "recipe") {
+      scheduleCandidateFill("recipe");
     }
 
     return Boolean(imageUrl);
@@ -393,34 +670,55 @@ async function loadData() {
       fetchJson("data/takeout.json"),
       fetchJson("data/recipe.json"),
     ]);
-
-    await Promise.all([
-      requestTakeout({ animate: false }),
-      requestRecipe({ animate: false }),
-    ]);
+    dataReady = true;
+    return true;
   } catch (error) {
+    dataReady = false;
     console.error(error);
     showError("takeout", "数据读取失败，请通过本地服务器打开网站。");
     showError("recipe", "数据读取失败，请通过本地服务器打开网站。");
+    return false;
   }
+}
+
+async function enterMode(mode) {
+  setActiveMode(mode);
+  showView(mode);
+
+  if (!dataReady) {
+    setModeLoading(mode, true);
+    const loaded = await dataLoadPromise;
+    setModeLoading(mode, false);
+
+    if (!loaded || activeMode !== mode) {
+      return;
+    }
+  }
+
+  if (!getModeCurrentName(mode)) {
+    if (mode === "takeout") {
+      await requestTakeout({ animate: false });
+    } else {
+      await requestRecipe({ animate: false });
+    }
+    return;
+  }
+
+  scheduleCandidateFill(mode);
 }
 
 entryButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const mode = button.dataset.mode;
-
-    showView(mode);
-
-    if (mode === "takeout") {
-      void requestTakeout();
-    } else {
-      void requestRecipe();
-    }
+    void enterMode(mode);
   });
 });
 
 backButtons.forEach((button) => {
-  button.addEventListener("click", () => showView("home"));
+  button.addEventListener("click", () => {
+    setActiveMode(null);
+    showView("home");
+  });
 });
 
 changeTakeoutButton.addEventListener("click", () => void requestTakeout());
@@ -432,5 +730,31 @@ openRecipeDetailButton.addEventListener("click", () => {
 });
 backToRecipeButton.addEventListener("click", () => showView("recipe"));
 window.addEventListener("resize", scheduleRecipeDetailTitleLayout);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    window.clearTimeout(candidateFillTimer);
+    candidateFillTimer = 0;
 
-loadData();
+    if (activeMode) {
+      candidatePoolGenerations[activeMode] += 1;
+    }
+    return;
+  }
+
+  if (activeMode) {
+    scheduleCandidateFill(activeMode);
+  }
+});
+window.addEventListener("pagehide", () => {
+  window.clearTimeout(candidateFillTimer);
+  candidateFillTimer = 0;
+  candidatePoolGenerations.takeout += 1;
+  candidatePoolGenerations.recipe += 1;
+});
+window.addEventListener("pageshow", () => {
+  if (activeMode) {
+    scheduleCandidateFill(activeMode);
+  }
+});
+
+dataLoadPromise = loadData();
