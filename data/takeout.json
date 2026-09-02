@@ -98,5 +98,55 @@
     "name": "杨枝甘露",
     "category": "小吃甜品",
     "image": "images/food/杨枝甘露.webp"
+  },
+  {
+    "name": "螺蛳粉",
+    "category": "广西风味",
+    "image": "images/food/螺蛳粉.webp"
+  },
+  {
+    "name": "酸菜鱼",
+    "category": "川渝菜",
+    "image": "images/food/酸菜鱼.webp"
+  },
+  {
+    "name": "肉夹馍",
+    "category": "西北小吃",
+    "image": "images/food/肉夹馍.webp"
+  },
+  {
+    "name": "麻辣烫",
+    "category": "街头小吃",
+    "image": "images/food/麻辣烫.webp"
+  },
+  {
+    "name": "炸鸡",
+    "category": "快餐炸物",
+    "image": "images/food/炸鸡.webp"
+  },
+  {
+    "name": "烤肉拌饭",
+    "category": "韩式料理",
+    "image": "images/food/烤肉拌饭.webp"
+  },
+  {
+    "name": "咖喱鸡饭",
+    "category": "咖喱料理",
+    "image": "images/food/咖喱鸡饭.webp"
+  },
+  {
+    "name": "肥牛饭",
+    "category": "日式料理",
+    "image": "images/food/肥牛饭.webp"
+  },
+  {
+    "name": "鸡公煲",
+    "category": "煲类",
+    "image": "images/food/鸡公煲.webp"
+  },
+  {
+    "name": "砂锅米线",
+    "category": "云南风味",
+    "image": "images/food/砂锅米线.webp"
   }
 ]

@@ -3783,8 +3783,10 @@ h1:focus,
 }
 
 .recipe-detail-collage {
+  --ingredients-flow-start: 347px;
+
   position: relative;
-  min-height: 596px;
+  padding: var(--ingredients-flow-start) 0 16px;
 }
 
 .recipe-detail-view .recipe-detail-hero {
@@ -3995,12 +3997,10 @@ h1:focus,
 }
 
 .recipe-detail-view .ingredients-panel {
-  position: absolute;
+  position: relative;
   z-index: 10;
-  top: 347px;
-  left: 9px;
   width: 62%;
-  margin: 0;
+  margin: 0 0 0 9px;
   padding: 0;
 }
 
@@ -4306,7 +4306,7 @@ h1:focus,
   }
 
   .recipe-detail-collage {
-    min-height: 615px;
+    --ingredients-flow-start: 363px;
   }
 
   .recipe-detail-view .recipe-detail-heading {
@@ -4368,9 +4368,8 @@ h1:focus,
   }
 
   .recipe-detail-view .ingredients-panel {
-    top: 363px;
-    left: 6px;
     width: 64%;
+    margin-left: 6px;
   }
 
   .recipe-detail-view .ingredients-sheet {
@@ -4454,44 +4453,29 @@ h1:focus,
   .recipe-detail-view .recipe-detail-image {
     transform: translate(clamp(-69px, -16vw, -60px), -12px) rotate(0.6deg);
   }
-
-  .recipe-detail-collage:not(:has(#recipe-ingredients li:nth-child(4))) {
-    min-height: 576px;
-  }
 }
 
 @media (max-width: 719px) {
   /* 真机长标题：在标签与大食物之间保留明确的纵向安全区。 */
   #recipe-details .recipe-detail-collage.has-multiline-title {
-    min-height: 736px;
-  }
-
-  #recipe-details .recipe-detail-collage.has-multiline-title:not(:has(#recipe-ingredients li:nth-child(4))) {
-    min-height: 716px;
+    --ingredients-flow-start: 487px;
   }
 
   .recipe-detail-view .recipe-detail-collage.has-multiline-title .recipe-detail-food-paper {
     top: 187px;
   }
 
-  .recipe-detail-view .recipe-detail-collage.has-multiline-title .ingredients-panel {
-    top: 487px;
-  }
 }
 
 @media (max-width: 370px) {
-  #recipe-details .recipe-detail-collage.has-multiline-title,
-  #recipe-details .recipe-detail-collage.has-multiline-title:not(:has(#recipe-ingredients li:nth-child(4))) {
-    min-height: 743px;
+  #recipe-details .recipe-detail-collage.has-multiline-title {
+    --ingredients-flow-start: 491px;
   }
 
   .recipe-detail-view .recipe-detail-collage.has-multiline-title .recipe-detail-food-paper {
     top: 191px;
   }
 
-  .recipe-detail-view .recipe-detail-collage.has-multiline-title .ingredients-panel {
-    top: 491px;
-  }
 }
 
 @media (min-width: 720px) {
@@ -4516,7 +4500,7 @@ h1:focus,
   }
 
   .recipe-detail-collage {
-    min-height: 707px;
+    --ingredients-flow-start: 377px;
   }
 
   .recipe-detail-view .recipe-detail-heading {
@@ -4590,8 +4574,6 @@ h1:focus,
   }
 
   .recipe-detail-view .ingredients-panel {
-    top: 377px;
-    left: 9px;
     width: 40%;
   }
 
